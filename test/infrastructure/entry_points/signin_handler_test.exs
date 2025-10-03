@@ -39,7 +39,8 @@ defmodule Infrastructure.EntryPoints.RestController.Authentication.Signin.Applic
 
     conn = SigninHandler.call(conn, @signin_opts)
     assert conn.status == 404
-    assert %{"code" => "ER404_00"} = Jason.decode!(conn.resp_body)
+    body = Jason.decode!(conn.resp_body)
+    assert body["error"]["code"] == "USER_NOT_FOUND"
   end
 
   test "invalid credentials" do
@@ -50,13 +51,14 @@ defmodule Infrastructure.EntryPoints.RestController.Authentication.Signin.Applic
 
     conn = SigninHandler.call(conn, @signin_opts)
     assert conn.status == 401
-    assert %{"code" => "ER401_00"} = Jason.decode!(conn.resp_body)
+    body = Jason.decode!(conn.resp_body)
+    assert body["error"]["code"] == "INVALID_CREDENTIALS"
   end
 
   test "missing param" do
     conn =
       :post
-      |> conn("/", ~s({"email":"user@unit.com"}))
+      |> conn("/", ~s({"param":"value"}))
       |> put_req_header("content-type", "application/json")
 
     conn = SigninHandler.call(conn, @signin_opts)

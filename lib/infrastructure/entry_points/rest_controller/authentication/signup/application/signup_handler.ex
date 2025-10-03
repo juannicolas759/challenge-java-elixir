@@ -27,47 +27,66 @@ defmodule Infrastructure.EntryPoints.RestController.Authentication.Signup.Applic
 
     {:ok, context} = ContextData.new(message_id, x_request_id)
 
+    if is_nil(email) or is_nil(password) or is_nil(name) do
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(
+        BusinessCode.status_code(:bad_request),
+        Jason.encode!(%{
+          code: BusinessCode.business_code_message(:ER400_00),
+          message: BusinessCode.code_message(:ER400_00),
+          detail: %{
+            business_code: BusinessCode.business_code(:ER400_00),
+            category: BusinessCode.category(:BEX_ECS)
+          },
+          correlation: %{
+            message_id: context.message_id,
+            x_request_id: context.x_request_id
+          }
+        })
+      )
+    else
+      state =
+        Infrastructure.DrivenAdapters.InMemory.Signup.Application.SignUpStateAgent.get_state()
 
-    state = Infrastructure.DrivenAdapters.InMemory.Signup.Application.SignUpStateAgent.get_state()
+      case SignUp.execute(state, email, password, name, context) do
+        {:ok, _dto, new_state} ->
+          Infrastructure.DrivenAdapters.InMemory.Signup.Application.SignUpStateAgent.update_state(
+            new_state
+          )
 
-    case SignUp.execute(state, email, password, name, context) do
-      {:ok, _dto, new_state} ->
-        Infrastructure.DrivenAdapters.InMemory.Signup.Application.SignUpStateAgent.update_state(
-          new_state
-        )
+          conn
+          |> put_resp_content_type("application/json")
+          |> send_resp(201, "")
 
-        conn
-        |> put_resp_content_type("application/json")
-        |> send_resp(201, "")
+        {:error, status, reason} ->
+          conn
+          |> put_resp_content_type("application/json")
+          |> send_resp(status, Jason.encode!(%{error: reason}))
 
-      {:error, status, reason} ->
-        conn
-        |> put_resp_content_type("application/json")
-        |> send_resp(status, Jason.encode!(%{error: reason}))
-
-      _ ->
-        conn
-        |> put_resp_content_type("application/json")
-        |> send_resp(
-          BusinessCode.status_code(:bad_request),
-          Jason.encode!(%{
-            code: BusinessCode.business_code_message(:ER400_00),
-            message: BusinessCode.code_message(:ER400_00),
-            detail: %{
-              business_code: BusinessCode.business_code(:ER400_00),
-              category: BusinessCode.category(:BEX_ECS)
-            },
-            correlation: %{
-              message_id: context.message_id,
-              x_request_id: context.x_request_id
-            }
-          })
-        )
+        _ ->
+          conn
+          |> put_resp_content_type("application/json")
+          |> send_resp(
+            BusinessCode.status_code(:bad_request),
+            Jason.encode!(%{
+              code: BusinessCode.business_code_message(:ER400_00),
+              message: BusinessCode.code_message(:ER400_00),
+              detail: %{
+                business_code: BusinessCode.business_code(:ER400_00),
+                category: BusinessCode.category(:BEX_ECS)
+              },
+              correlation: %{
+                message_id: context.message_id,
+                x_request_id: context.x_request_id
+              }
+            })
+          )
+      end
     end
   end
 
   match _ do
     send_resp(conn, 404, "Not Found")
   end
-
 end

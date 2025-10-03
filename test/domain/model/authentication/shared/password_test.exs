@@ -17,6 +17,6 @@ defmodule Domain.Model.Shared.Common.Validate.PasswordTest do
   test "password weak", %{context: context} do
     assert {:ok, %Password{value: "123"}} = Password.new("123", context)
     assert {:error, 400, error_map} = Password.validate(%Password{value: "123"}, context)
-    assert error_map.code == "ER400_01"
+    assert error_map.code == "WEAK_PASSWORD"
   end
 end

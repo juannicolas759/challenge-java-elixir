@@ -15,11 +15,11 @@ defmodule Domain.Model.Shared.Common.Validate.EmailTest do
 
   test "email invalid", %{context: context} do
     assert {:error, 400, error_map} = Email.new("invalid", context)
-    assert error_map.code == "ER400_02"
+    assert error_map.code == "INVALID_EMAIL_FORMAT"
   end
 
   test "email empty", %{context: context} do
     assert {{:error, 400, error_map}} = Email.new("", context)
-    assert error_map.code == "ER400_02"
+    assert error_map.code == "INVALID_EMAIL_FORMAT"
   end
 end

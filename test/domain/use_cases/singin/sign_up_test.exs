@@ -6,7 +6,7 @@ defmodule Domain.UseCase.Authentication.SignUpTest do
   alias Infrastructure.Adapters.InMemory.SignUpGateway
 
   setup do
-    context = %ContextData{message_id: "mid", x_request_id: "xid"}
+    context = %ContextData{message_id: "550e8400-e29b-41d4-a716-446655440000", x_request_id: "550e8400-e29b-41d4-a716-446655440000"}
     state = SignUpGateway.new()
     {:ok, context: context, state: state}
   end
@@ -20,16 +20,16 @@ defmodule Domain.UseCase.Authentication.SignUpTest do
   test "email exist (409)", %{context: context, state: state} do
     {:ok, _dto, state1} = SignUp.execute(state, "dup@test.com", "password123", "Test", context)
     {:error, 409, error_map} = SignUp.execute(state1, "dup@test.com", "password123", "Test", context)
-    assert error_map.code == "ER409_00"
+    assert error_map.code == "EMAIL_ALREADY_EXISTS"
   end
 
   test "email invalid (400)", %{context: context, state: state} do
     {:error, 400, error_map} = SignUp.execute(state, "invalid-email", "password123", "Test", context)
-    assert error_map.code == "ER400_02"
+    assert error_map.code == "INVALID_EMAIL_FORMAT"
   end
 
   test "password weak (400)", %{context: context, state: state} do
     {:error, 400, error_map} = SignUp.execute(state, "pw@test.com", "123", "Test", context)
-    assert error_map.code == "ER400_01"
+    assert error_map.code == "WEAK_PASSWORD"
   end
 end

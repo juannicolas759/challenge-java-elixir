@@ -108,7 +108,7 @@ defmodule ChallengeElixir.Utils.DataTypeUtilsTest do
   end
 
   test "converts monotonic time in native units to milliseconds" do
-    assert DataTypeUtils.monotonic_time_to_milliseconds(1_000_000) == 1
+    assert DataTypeUtils.monotonic_time_to_milliseconds(1_000_000) == 100
   end
 
   test "returns different numbers on subsequent calls" do

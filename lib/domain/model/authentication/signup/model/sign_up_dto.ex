@@ -31,19 +31,20 @@ defmodule Domain.Model.Authentication.SignUpDTO do
          context_data: context_data
        }}
     else
-      {:error, reason} -> {:error, reason}
+      {:error, _, _} = error -> error
+    {:error, reason} -> {:error, reason}
     end
   end
 
-  @spec set_sign_in(t(), String.t(), String.t(), String.t(), ContextData.t()) ::
+  @spec set_sign_up(t(), String.t(), String.t(), String.t(), ContextData.t()) ::
           {:ok, t} | {:error, atom}
-  def set_sign_in(%__MODULE__{} = sign_in, email_str, password_str, name, %ContextData{} = context_data) do
+  def set_sign_up(%__MODULE__{} = sign_up, email_str, password_str, name, %ContextData{} = context_data) do
     with {:ok, email} <- Email.new(email_str,context_data),
          {:ok, pass} <- Password.new(password_str, context_data),
          :ok <- Password.validate(pass, context_data) do
       {:ok,
        %__MODULE__{
-         sign_in
+         sign_up
          | email: email,
            password: pass,
            name: name

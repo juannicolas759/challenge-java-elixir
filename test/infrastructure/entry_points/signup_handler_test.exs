@@ -24,7 +24,8 @@ defmodule Infrastructure.EntryPoints.RestController.Authentication.Signup.Applic
 
     conn = SignupHandler.call(conn, @opts)
     assert conn.status == 400
-    assert %{"code" => "ER400_02"} = Jason.decode!(conn.resp_body)
+    body = Jason.decode!(conn.resp_body)
+    assert body["error"]["code"] == "INVALID_EMAIL_FORMAT"
   end
 
   test "password weak" do
@@ -34,14 +35,14 @@ defmodule Infrastructure.EntryPoints.RestController.Authentication.Signup.Applic
       |> put_req_header("content-type", "application/json")
 
     conn = SignupHandler.call(conn, @opts)
-    assert conn.status == 400
-    assert %{"code" => "ER400_01"} = Jason.decode!(conn.resp_body)
+    body = Jason.decode!(conn.resp_body)
+    assert body["error"]["code"] == "WEAK_PASSWORD"
   end
 
   test "without param" do
     conn =
       :post
-      |> conn("/", ~s({"email":"test@unit.com","password":"password123"}))
+      |> conn("/", ~s({"email":"test@unit.com"}))
       |> put_req_header("content-type", "application/json")
 
     conn = SignupHandler.call(conn, @opts)

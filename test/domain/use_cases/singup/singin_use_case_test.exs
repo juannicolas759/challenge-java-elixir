@@ -21,12 +21,12 @@ defmodule Domain.UseCases.Authentication.Signin.SigninUseCaseTest do
 
   test "user not found (404)", %{context: context, user_state: user_state, session_state: session_state} do
     {:error, 404, error_map} = SigninUseCase.execute("nouser@test.com", "password123", context, user_state, session_state)
-    assert error_map.code == "ER404_00"
+    assert error_map.code == "USER_NOT_FOUND"
   end
 
   test "credentials invalid (401)", %{context: context, user_state: user_state, session_state: session_state} do
     {:ok, _dto, user_state} = SignUp.execute(user_state, "user2@test.com", "password123", "Test", context)
     {:error, 401, error_map} = SigninUseCase.execute("user2@test.com", "wrongpass", context, user_state, session_state)
-    assert error_map.code == "ER401_00"
+    assert error_map.code == "INVALID_CREDENTIALS"
   end
 end

@@ -36,7 +36,7 @@ defmodule ChallengeElixir.Infrastructure.EntryPoints.RestController.RouterContro
     schema: SignInDTO
   )
 
-  # send_resp(conn, conn.status, "Something went wrong")
+
   defp handle_errors(conn, %{kind: _kind, reason: _reason, stack: _stack}) do
     message_id = List.first(Plug.Conn.get_req_header(conn, "message-id"))
     x_request_id = List.first(Plug.Conn.get_req_header(conn, "x-request-id"))
